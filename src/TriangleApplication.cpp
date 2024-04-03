@@ -86,6 +86,54 @@ void TriangleApplication::main_loop()
 
         this->drawFrame();
     }
+
+    vkDeviceWaitIdle(m_device->get_logical_device());
+}
+
+void TriangleApplication::drawFrame()
+{
+    vkWaitForFences(m_device->get_logical_device(), 1, &m_syncobject->get_inflight_fence(), VK_TRUE, UINT64_MAX);
+    vkResetFences(m_device->get_logical_device(), 1, &m_syncobject->get_inflight_fence());
+
+    uint32_t imageIndex;
+    vkAcquireNextImageKHR(m_device->get_logical_device(), m_swapchain->get_object(), UINT64_MAX, m_syncobject->get_image_available_semaphore(), VK_NULL_HANDLE, &imageIndex);
+
+    vkResetCommandBuffer(m_commandbuffer->get_command_buffer(), /*VkCommandBufferResetFlagBits*/ 0);
+    m_commandbuffer->record_command_buffer(imageIndex);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    VkSemaphore waitSemaphores[] = {m_syncobject->get_image_available_semaphore()};
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.pWaitDstStageMask = waitStages;
+
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &m_commandbuffer->get_command_buffer();
+
+    VkSemaphore signalSemaphores[] = {m_syncobject->get_render_finished_semaphore()};
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+
+    if (vkQueueSubmit(m_device->get_graphics_queue(), 1, &submitInfo, m_syncobject->get_inflight_fence()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to submit draw command buffer!");
+    }
+
+    VkPresentInfoKHR presentInfo{};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
+
+    VkSwapchainKHR swapChains[] = {m_swapchain->get_object()};
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapChains;
+
+    presentInfo.pImageIndices = &imageIndex;
+
+    vkQueuePresentKHR(m_device->get_present_queue(), &presentInfo);
 }
 
 void TriangleApplication::drawFrame()
