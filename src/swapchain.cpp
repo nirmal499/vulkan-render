@@ -5,6 +5,12 @@
 #include <vulkan/surface/surface.hpp>
 #include <vulkan/renderpass/renderpass.hpp>
 
+const VkFramebuffer& SwapChain::get_frame_buffer_using_index(uint32_t imageIndex)
+{
+    return m_swap_chain_frame_buffers.at(imageIndex);
+}
+
+
 void SwapChain::swapchain_initialization(Surface* surface, GLFWwindow* window, Device* device)
 {
     if(device == nullptr || surface == nullptr || window == nullptr)
@@ -17,6 +23,10 @@ void SwapChain::swapchain_initialization(Surface* surface, GLFWwindow* window, D
     m_temp_device = device;
 }
 
+const VkExtent2D& SwapChain::get_swap_chain_extent()
+{
+    return m_swap_chain_extent;
+}
 
 const VkSwapchainKHR& SwapChain::get_object()
 {

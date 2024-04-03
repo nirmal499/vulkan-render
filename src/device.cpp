@@ -8,6 +8,26 @@ void Device::destroy()
     std::cout << "In Device there is NOTHING to destroy..\n";
 }
 
+const VkQueue& Device::get_graphics_queue()
+{
+    if(m_graphics_queue == VK_NULL_HANDLE)
+    {
+        throw std::runtime_error("Device graphics queue is NULL");
+    }
+
+    return m_graphics_queue;
+}
+
+const VkQueue& Device::get_present_queue()
+{
+    if(m_present_queue == VK_NULL_HANDLE)
+    {
+        throw std::runtime_error("Device present queue is NULL");
+    }
+
+    return m_present_queue;
+}
+
 void Device::device_initialization(Instance* instance, Surface* surface, GLFWwindow* window)
 {
     if(instance == nullptr || surface == nullptr || window == nullptr)

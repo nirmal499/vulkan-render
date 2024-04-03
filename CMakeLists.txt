@@ -26,6 +26,8 @@ add_executable(${EXECUTABLE_NAME}
     src/swapchain.cpp
     src/graphicspipeline.cpp
     src/renderpass.cpp
+    src/commandbuffer.cpp
+    src/syncobject.cpp
     src/TriangleApplication.cpp
 )
 

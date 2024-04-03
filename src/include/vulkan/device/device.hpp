@@ -16,6 +16,9 @@ class Device
         const VkDevice& get_logical_device();
         const VkPhysicalDevice& get_physical_device();
 
+        const VkQueue& get_graphics_queue();
+        const VkQueue& get_present_queue();
+
         void destroy();
 
         COMMON::SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);

@@ -20,6 +20,9 @@ class SwapChain
 
         const VkSwapchainKHR& get_object();
         const VkFormat& get_swap_chain_image_format();
+        const VkExtent2D& get_swap_chain_extent();
+
+        const VkFramebuffer& get_frame_buffer_using_index(uint32_t imageIndex);
 
     private:
 

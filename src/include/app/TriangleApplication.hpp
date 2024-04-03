@@ -8,6 +8,8 @@
 #include <vulkan/swapchain/swapchain.hpp>
 #include <vulkan/renderpass/renderpass.hpp>
 #include <vulkan/graphicspipeline/graphicspipeline.hpp>
+#include <vulkan/commandbuffer/commandbuffer.hpp>
+#include <vulkan/syncobject/syncobject.hpp>
 
 class TriangleApplication
 {
@@ -19,6 +21,7 @@ class TriangleApplication
         void initialize_vulkan();
         void main_loop();
         void cleanup();
+        void drawFrame();
 
     private:
         GLFWwindow* m_window = nullptr;
@@ -29,4 +32,6 @@ class TriangleApplication
         SwapChain* m_swapchain = nullptr;
         RenderPass* m_renderpass = nullptr;
         GraphicsPipeline* m_graphicspipeline = nullptr;
+        CommandBuffer* m_commandbuffer = nullptr;
+        SyncObject* m_syncobject = nullptr;
 };
