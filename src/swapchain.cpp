@@ -9,6 +9,11 @@ const VkSwapchainKHR& SwapChain::get_object()
     return m_swap_chain;
 }
 
+const VkFormat& SwapChain::get_swap_chain_image_format()
+{
+    return m_swap_chain_image_format;
+}
+
 void SwapChain::destroy()
 {
     for (auto imageView : m_swap_chain_image_views) 

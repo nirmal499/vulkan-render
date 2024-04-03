@@ -12,6 +12,7 @@ class SwapChain
         void destroy();
 
         const VkSwapchainKHR& get_object();
+        const VkFormat& get_swap_chain_image_format();
 
     private:
 

@@ -49,8 +49,12 @@ void TriangleApplication::initialize_vulkan()
     (void)m_swapchain->get_object();
 
     m_graphicspipeline = new GraphicsPipeline();
-    m_graphicspipeline->create(m_device);
-    (void)m_graphicspipeline->get_object();
+    m_graphicspipeline->graphicspipeline_initialization(m_device, m_swapchain);
+    m_graphicspipeline->create_render_pass();
+    m_graphicspipeline->create_graphics_pipeline();
+    (void)m_graphicspipeline->get_render_pass();
+    (void)m_graphicspipeline->get_pipeline_layout();
+    (void)m_graphicspipeline->get_graphics_pipeline();
 }
 
 void TriangleApplication::main_loop()
