@@ -10,6 +10,8 @@
 #include <cstring>
 #include <optional>
 #include <set>
+#include <limits>
+#include <algorithm>
 
 namespace COMMON
 {
@@ -26,8 +28,19 @@ namespace COMMON
         }
     };
 
+    struct SwapChainSupportDetails
+    {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    };
+
     const std::vector<const char*> required_validation_layers_vec = {
         "VK_LAYER_KHRONOS_validation"
+    };
+
+    const std::vector<const char*> required_device_extensions_vec = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
     #ifdef NDEBUG
@@ -49,4 +62,6 @@ namespace COMMON
     bool check_validation_layer_support();
 
     std::vector<const char*> get_required_extensions();
+
+    bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 }

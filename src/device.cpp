@@ -1,8 +1,13 @@
 #include <vulkan/device/device.hpp>
 
-const VkDevice& Device::get_object()
+const VkDevice& Device::get_logical_device()
 {
     return m_logical_device;
+}
+
+const VkPhysicalDevice& Device::get_physical_device()
+{
+    return m_physical_device;
 }
 
 void Device::create_logical_device()
@@ -41,7 +46,8 @@ void Device::create_logical_device()
 
     createInfo.pEnabledFeatures = &deviceFeatures;
 
-    createInfo.enabledExtensionCount = 0;
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(COMMON::required_device_extensions_vec.size());
+    createInfo.ppEnabledExtensionNames = COMMON::required_device_extensions_vec.data();
 
     if (COMMON::ENABLE_VALIDATION_LAYER) {
         createInfo.enabledLayerCount = static_cast<uint32_t>(COMMON::required_validation_layers_vec.size());
@@ -62,19 +68,40 @@ void Device::create_logical_device()
     vkGetDeviceQueue(m_logical_device, indices.presentFamily.value(), 0, &m_present_queue);
 }
 
-void Device::pick_physical_device(Instance* instance, Surface* surface)
+COMMON::SwapChainSupportDetails Device::querySwapChainSupport(VkPhysicalDevice device)
+{
+    COMMON::SwapChainSupportDetails details;
+
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_temp_surface->get_object(), &details.capabilities);
+
+    uint32_t formatCount;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_temp_surface->get_object(), &formatCount, nullptr);
+
+    if (formatCount != 0) {
+        details.formats.resize(formatCount);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_temp_surface->get_object(), &formatCount, details.formats.data());
+    }
+
+    uint32_t presentModeCount;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_temp_surface->get_object(), &presentModeCount, nullptr);
+
+    if (presentModeCount != 0) {
+        details.presentModes.resize(presentModeCount);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_temp_surface->get_object(), &presentModeCount, details.presentModes.data());
+    }
+
+    return details;
+}
+
+void Device::pick_physical_device(Instance* instance, Surface* surface, GLFWwindow* window)
 {
 
-    if(instance == nullptr )
+    if(instance == nullptr || surface == nullptr || window == nullptr)
     {
-        throw std::runtime_error("Provided Instance* is NULL");
+        throw std::runtime_error("In Device::pick_physical_device you have provided NULL");
     }
 
-    if(surface == nullptr)
-    {
-        throw std::runtime_error("Provided Surface* is NULL");
-    }
-
+    m_temp_window = window;
     m_temp_surface = surface;
 
     uint32_t deviceCount = 0;
@@ -109,11 +136,23 @@ bool Device::isDeviceSuitable(VkPhysicalDevice device){
         need
     */
     COMMON::QueueFamilyIndices indices = this->findQueueFamilies(device);
+    bool extensionsSupported = COMMON::checkDeviceExtensionSupport(device);
 
-    return indices.isComplete();
+    bool swapChainAdequate = false;
+    if (extensionsSupported) {
+        COMMON::SwapChainSupportDetails swapChainSupport_details = querySwapChainSupport(device);
+        swapChainAdequate = !swapChainSupport_details.formats.empty() && !swapChainSupport_details.presentModes.empty();
+        if(swapChainAdequate)
+        {
+            std::cout << "SwapChain is supported\n";
+        }
+    }
+
+    return swapChainAdequate && indices.isComplete() && extensionsSupported;
 }
 
-COMMON::QueueFamilyIndices Device::findQueueFamilies(VkPhysicalDevice device) {
+COMMON::QueueFamilyIndices Device::findQueueFamilies(VkPhysicalDevice device)
+{
     COMMON::QueueFamilyIndices indices;
 
     uint32_t queueFamilyCount = 0;

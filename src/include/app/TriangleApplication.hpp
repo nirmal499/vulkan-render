@@ -5,12 +5,13 @@
 #include <vulkan/validation_layer/validation.hpp>
 #include <vulkan/surface/surface.hpp>
 #include <vulkan/device/device.hpp>
+#include <vulkan/swapchain/swapchain.hpp>
 
 class TriangleApplication
 {
     public:
         void run();
-        
+
     private:
         void initialize_window();
         void initialize_vulkan();
@@ -23,4 +24,5 @@ class TriangleApplication
         Validation* m_validation = nullptr;
         Surface* m_surface = nullptr;
         Device* m_device = nullptr;
+        SwapChain* m_swapchain = nullptr;
 };

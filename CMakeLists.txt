@@ -23,6 +23,7 @@ add_executable(${EXECUTABLE_NAME}
     src/validation.cpp
     src/surface.cpp
     src/device.cpp
+    src/swapchain.cpp
     src/TriangleApplication.cpp
 )
 
