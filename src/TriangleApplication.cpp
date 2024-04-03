@@ -33,6 +33,15 @@ void TriangleApplication::initialize_vulkan()
     m_validation = new Validation();
     m_validation->create_debug_messenger(m_instance);
     (void)m_validation->get_object();
+
+    m_surface = new Surface();
+    m_surface->create(m_instance, m_window);
+    (void)m_surface->get_object();
+
+    m_device = new Device();
+    m_device->pick_physical_device(m_instance, m_surface);
+    m_device->create_logical_device();
+    (void)m_device->get_object();
 }
 
 void TriangleApplication::main_loop()
@@ -44,10 +53,14 @@ void TriangleApplication::main_loop()
 
 void TriangleApplication::cleanup()
 {   
+    m_device->destroy();
+    m_surface->destroy(m_instance);
     m_validation->destroy(m_instance);
-    delete m_validation;
-
     m_instance->destroy();
+
+    delete m_device;
+    delete m_surface;
+    delete m_validation;
     delete m_instance;
 
     glfwDestroyWindow(m_window);

@@ -8,11 +8,23 @@
 #include <cstdlib>
 #include <vector>
 #include <cstring>
+#include <optional>
+#include <set>
 
 namespace COMMON
 {
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
+
+    struct QueueFamilyIndices
+    {
+        std::optional<uint32_t> graphicsFamily;
+        std::optional<uint32_t> presentFamily;
+
+        bool isComplete() {
+            return graphicsFamily.has_value() && presentFamily.has_value();
+        }
+    };
 
     const std::vector<const char*> required_validation_layers_vec = {
         "VK_LAYER_KHRONOS_validation"

@@ -21,6 +21,8 @@ add_executable(${EXECUTABLE_NAME}
     src/header.cpp
     src/instance.cpp
     src/validation.cpp
+    src/surface.cpp
+    src/device.cpp
     src/TriangleApplication.cpp
 )
 
