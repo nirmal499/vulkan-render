@@ -12,6 +12,9 @@
 #include <set>
 #include <limits>
 #include <algorithm>
+#include <fstream>
+
+#define SHADERS_PATH "/home/nbaskey/Desktop/nirmal/projects/using-vulkan/shaders/SPIRV/"
 
 namespace COMMON
 {
@@ -64,4 +67,6 @@ namespace COMMON
     std::vector<const char*> get_required_extensions();
 
     bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+
+    std::vector<char> readFile(const std::string& filename);
 }

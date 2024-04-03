@@ -47,6 +47,10 @@ void TriangleApplication::initialize_vulkan()
     m_swapchain->create_swap_chain(m_surface, m_window, m_device);
     m_swapchain->create_image_views();
     (void)m_swapchain->get_object();
+
+    m_graphicspipeline = new GraphicsPipeline();
+    m_graphicspipeline->create(m_device);
+    (void)m_graphicspipeline->get_object();
 }
 
 void TriangleApplication::main_loop()
@@ -59,12 +63,14 @@ void TriangleApplication::main_loop()
 void TriangleApplication::cleanup()
 {   
 
+    m_graphicspipeline->destroy();
     m_swapchain->destroy();
     m_device->destroy();
     m_surface->destroy(m_instance);
     m_validation->destroy(m_instance);
     m_instance->destroy();
 
+    delete m_graphicspipeline;
     delete m_swapchain;
     delete m_device;
     delete m_surface;

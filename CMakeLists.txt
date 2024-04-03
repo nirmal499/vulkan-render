@@ -24,6 +24,7 @@ add_executable(${EXECUTABLE_NAME}
     src/surface.cpp
     src/device.cpp
     src/swapchain.cpp
+    src/graphicspipeline.cpp
     src/TriangleApplication.cpp
 )
 
