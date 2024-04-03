@@ -1,14 +1,21 @@
 #pragma once
 
 #include <common/header.hpp>
-#include <vulkan/device/device.hpp>
-#include <vulkan/surface/surface.hpp>
+
+class Surface;
+class Device;
+class RenderPass;
 
 class SwapChain
 {
     public:
-        void create_swap_chain(Surface* surface, GLFWwindow* window, Device* device);
+        void swapchain_initialization(Surface* surface, GLFWwindow* window, Device* device);
+        void create_swap_chain();
         void create_image_views();
+
+        void create_frame_buffers(RenderPass* renderpass);
+        void destroy_frame_buffer();
+
         void destroy();
 
         const VkSwapchainKHR& get_object();
@@ -28,6 +35,7 @@ class SwapChain
         VkExtent2D m_swap_chain_extent;
 
         std::vector<VkImageView> m_swap_chain_image_views;
+        std::vector<VkFramebuffer> m_swap_chain_frame_buffers;
 
         /* helper objects */
         Device* m_temp_device = nullptr;

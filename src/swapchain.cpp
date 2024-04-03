@@ -1,5 +1,23 @@
 #include <vulkan/swapchain/swapchain.hpp>
 
+/* We included the headers in .cpp inorder to solve the recursive header dependency problem */
+#include <vulkan/device/device.hpp>
+#include <vulkan/surface/surface.hpp>
+#include <vulkan/renderpass/renderpass.hpp>
+
+void SwapChain::swapchain_initialization(Surface* surface, GLFWwindow* window, Device* device)
+{
+    if(device == nullptr || surface == nullptr || window == nullptr)
+    {
+        throw std::runtime_error("In SwapChain::swapchain_initialization you have provided NULL");
+    }
+
+    m_temp_window = window;
+    m_temp_surface = surface;
+    m_temp_device = device;
+}
+
+
 const VkSwapchainKHR& SwapChain::get_object()
 {
     if(m_swap_chain == VK_NULL_HANDLE)
@@ -14,14 +32,52 @@ const VkFormat& SwapChain::get_swap_chain_image_format()
     return m_swap_chain_image_format;
 }
 
+void SwapChain::destroy_frame_buffer()
+{
+    std::cout << "Destroying " << m_swap_chain_frame_buffers.size() << " SwapChain Framebuffers...\n";
+    for (auto framebuffer : m_swap_chain_frame_buffers) 
+    {
+        vkDestroyFramebuffer(m_temp_device->get_logical_device(), framebuffer, nullptr);
+    }
+}
+
 void SwapChain::destroy()
 {
+    std::cout << "Destroying " << m_swap_chain_image_views.size() << " SwapChain ImageViews...\n";
     for (auto imageView : m_swap_chain_image_views) 
     {
         vkDestroyImageView(m_temp_device->get_logical_device(), imageView, nullptr);
     }
 
+    std::cout << "Destroying SwapChain...\n";
     vkDestroySwapchainKHR(m_temp_device->get_logical_device(), m_swap_chain, nullptr);
+}
+
+void SwapChain::create_frame_buffers(RenderPass* renderpass)
+{
+    m_swap_chain_frame_buffers.resize(m_swap_chain_image_views.size());
+
+    for (size_t i = 0; i < m_swap_chain_image_views.size(); i++) {
+        VkImageView attachments[] = {
+            m_swap_chain_image_views[i]
+        };
+
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = renderpass->get_object();
+        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.width = m_swap_chain_extent.width;
+        framebufferInfo.height = m_swap_chain_extent.height;
+        framebufferInfo.layers = 1;
+
+        if (vkCreateFramebuffer(m_temp_device->get_logical_device(), &framebufferInfo, nullptr, &m_swap_chain_frame_buffers[i]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create framebuffer!");
+        }
+    }
+
+    std::cout << "Successfully created " << m_swap_chain_frame_buffers.size() << " SwapChain FrameBuffers\n";
+
 }
 
 void SwapChain::create_image_views()
@@ -49,23 +105,13 @@ void SwapChain::create_image_views()
         }
     }
 
-    std::cout << "Successfully created " << m_swap_chain_images.size() << " ImageViews\n";
+    std::cout << "Successfully created " << m_swap_chain_image_views.size() << " SwapChain ImageViews\n";
 
 }
 
-void SwapChain::create_swap_chain(Surface* surface, GLFWwindow* window, Device* device)
+void SwapChain::create_swap_chain()
 {
-
-    if(surface == nullptr || window == nullptr || device == nullptr)
-    {
-        throw std::runtime_error("In SwapChain::create_swap_chain you provided NULL object");
-    }
-
-    m_temp_device = device;
-    m_temp_surface = surface;
-    m_temp_window = window;
-
-    COMMON::SwapChainSupportDetails swapChainSupport_details = device->querySwapChainSupport(device->get_physical_device());
+    COMMON::SwapChainSupportDetails swapChainSupport_details = m_temp_device->querySwapChainSupport(m_temp_device->get_physical_device());
 
     VkSurfaceFormatKHR surfaceFormat = this->chooseSwapSurfaceFormat(swapChainSupport_details.formats);
     VkPresentModeKHR presentMode = this->chooseSwapPresentMode(swapChainSupport_details.presentModes);
@@ -78,7 +124,7 @@ void SwapChain::create_swap_chain(Surface* surface, GLFWwindow* window, Device* 
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = surface->get_object();
+    createInfo.surface = m_temp_surface->get_object();
 
     createInfo.minImageCount = imageCount;
     createInfo.imageFormat = surfaceFormat.format;
@@ -87,7 +133,7 @@ void SwapChain::create_swap_chain(Surface* surface, GLFWwindow* window, Device* 
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    COMMON::QueueFamilyIndices indices = device->findQueueFamilies(device->get_physical_device());
+    COMMON::QueueFamilyIndices indices = m_temp_device->findQueueFamilies(m_temp_device->get_physical_device());
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
     if (indices.graphicsFamily != indices.presentFamily) {
@@ -107,7 +153,7 @@ void SwapChain::create_swap_chain(Surface* surface, GLFWwindow* window, Device* 
 
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if (vkCreateSwapchainKHR(device->get_logical_device(), &createInfo, nullptr, &m_swap_chain) != VK_SUCCESS) {
+    if (vkCreateSwapchainKHR(m_temp_device->get_logical_device(), &createInfo, nullptr, &m_swap_chain) != VK_SUCCESS) {
         throw std::runtime_error("failed to create swap chain!");
     }
     else
@@ -115,9 +161,9 @@ void SwapChain::create_swap_chain(Surface* surface, GLFWwindow* window, Device* 
         std::cout << "Successfully created Swapchain\n";
     }
 
-    vkGetSwapchainImagesKHR(device->get_logical_device(), m_swap_chain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(m_temp_device->get_logical_device(), m_swap_chain, &imageCount, nullptr);
     m_swap_chain_images.resize(imageCount);
-    vkGetSwapchainImagesKHR(device->get_logical_device(), m_swap_chain, &imageCount, m_swap_chain_images.data());
+    vkGetSwapchainImagesKHR(m_temp_device->get_logical_device(), m_swap_chain, &imageCount, m_swap_chain_images.data());
 
     m_swap_chain_image_format = surfaceFormat.format;
     m_swap_chain_extent = extent;

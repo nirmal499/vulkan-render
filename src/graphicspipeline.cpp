@@ -1,51 +1,17 @@
 #include <vulkan/graphicspipeline/graphicspipeline.hpp>
 
-void GraphicsPipeline::graphicspipeline_initialization(Device* device, SwapChain* swapchain)
+#include <vulkan/device/device.hpp>
+#include <vulkan/renderpass/renderpass.hpp>
+
+void GraphicsPipeline::graphicspipeline_initialization(Device* device, RenderPass* renderpass)
 {
-    if(device == nullptr || swapchain == nullptr)
+    if(device == nullptr || renderpass == nullptr)
     {
         throw std::runtime_error("In GraphicsPipeline::graphicspipeline_initialization you provided NULL objects");
     }
 
     m_temp_device = device;
-    m_temp_swapchain = swapchain;
-}
-
-void GraphicsPipeline::create_render_pass()
-{
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = m_temp_swapchain->get_swap_chain_image_format();
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-    VkAttachmentReference colorAttachmentRef{};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
-
-    VkRenderPassCreateInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-
-    if (vkCreateRenderPass(m_temp_device->get_logical_device(), &renderPassInfo, nullptr, &m_render_pass) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create render pass!");
-    }
-    else
-    {
-        std::cout << "Successfully created Render Pass\n";
-    }
+    m_temp_renderpass = renderpass;
 }
 
 const VkPipelineLayout& GraphicsPipeline::get_pipeline_layout()
@@ -55,15 +21,6 @@ const VkPipelineLayout& GraphicsPipeline::get_pipeline_layout()
         throw std::runtime_error("PipelineLayout is NULL");
     }
     return m_pipeline_layout;
-}
-
-const VkRenderPass& GraphicsPipeline::get_render_pass()
-{
-    if(m_render_pass == VK_NULL_HANDLE)
-    {
-        throw std::runtime_error("RenderPass is NULL");
-    }
-    return m_render_pass;
 }
 
 
@@ -197,13 +154,7 @@ void GraphicsPipeline::create_graphics_pipeline()
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.layout = m_pipeline_layout;
-
-    if(m_render_pass == VK_NULL_HANDLE)
-    {
-        throw std::runtime_error("Render Pass is NULL. First call create_render_pass and then call create_graphics_pipeline\n");
-    }
-
-    pipelineInfo.renderPass = m_render_pass;
+    pipelineInfo.renderPass = m_temp_renderpass->get_object();
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
@@ -221,7 +172,9 @@ void GraphicsPipeline::create_graphics_pipeline()
 
 void GraphicsPipeline::destroy()
 {
+    std::cout << "Destroying GraphicsPipeline...\n";
     vkDestroyPipeline(m_temp_device->get_logical_device(), m_graphics_pipeline, nullptr);
+
+    std::cout << "Destroying PipelineLayout...\n";
     vkDestroyPipelineLayout(m_temp_device->get_logical_device(), m_pipeline_layout, nullptr);
-    vkDestroyRenderPass(m_temp_device->get_logical_device(), m_render_pass, nullptr);
 }

@@ -1,4 +1,15 @@
 #include <vulkan/validation_layer/validation.hpp>
+#include <vulkan/instance/instance.hpp>
+
+void Validation::validation_initialization(Instance* instance)
+{
+    if(instance == nullptr)
+    {
+        throw std::runtime_error("Validation::validation_initialization is provided with NULL objects");
+    }
+
+    m_temp_instance = instance;
+}
 
 const VkDebugUtilsMessengerEXT& Validation::get_object()
 {
@@ -10,21 +21,22 @@ const VkDebugUtilsMessengerEXT& Validation::get_object()
     return m_debugMessenger;
 }
 
-void Validation::destroy(Instance* instance)
+void Validation::destroy()
 {
     if (COMMON::ENABLE_VALIDATION_LAYER) {
-        this->DestroyDebugUtilsMessengerEXT(instance->get_object(), nullptr);
+        std::cout << "Destroying Debug Layer...\n";
+        this->DestroyDebugUtilsMessengerEXT(m_temp_instance->get_object(), nullptr);
     }
 }
 
-void Validation::create_debug_messenger(Instance* instance)
+void Validation::create_debug_messenger()
 {
     if (!COMMON::ENABLE_VALIDATION_LAYER) return;
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo{}; // Initialization is IMP
     COMMON::populate_debug_messenger_create_info(createInfo);
 
-    if (this->CreateDebugUtilsMessengerEXT(instance->get_object(), &createInfo, nullptr) != VK_SUCCESS) {
+    if (this->CreateDebugUtilsMessengerEXT(m_temp_instance->get_object(), &createInfo, nullptr) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create debug messenger");
     }
     else

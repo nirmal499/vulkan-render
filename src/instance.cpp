@@ -59,11 +59,12 @@ void Instance::create()
     }
     else
     {
-        std::cout << "Successfully created VkInstance\n";
+        std::cout << "Successfully created vKInstance\n";
     }
 }
 
 void Instance::destroy()
 {
+    std::cout << "Destroying vKInstance...\n";
     vkDestroyInstance(m_instance, nullptr);
 }

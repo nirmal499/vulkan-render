@@ -1,5 +1,26 @@
 #include <vulkan/device/device.hpp>
 
+#include <vulkan/instance/instance.hpp>
+#include <vulkan/surface/surface.hpp>
+
+void Device::destroy()
+{
+    std::cout << "In Device there is NOTHING to destroy..\n";
+}
+
+void Device::device_initialization(Instance* instance, Surface* surface, GLFWwindow* window)
+{
+    if(instance == nullptr || surface == nullptr || window == nullptr)
+    {
+        throw std::runtime_error("In Device::device_initialization you have provided NULL");
+    }
+
+    m_temp_window = window;
+    m_temp_surface = surface;
+    m_temp_instance = instance;
+}
+
+
 const VkDevice& Device::get_logical_device()
 {
     return m_logical_device;
@@ -93,26 +114,17 @@ COMMON::SwapChainSupportDetails Device::querySwapChainSupport(VkPhysicalDevice d
     return details;
 }
 
-void Device::pick_physical_device(Instance* instance, Surface* surface, GLFWwindow* window)
+void Device::pick_physical_device()
 {
-
-    if(instance == nullptr || surface == nullptr || window == nullptr)
-    {
-        throw std::runtime_error("In Device::pick_physical_device you have provided NULL");
-    }
-
-    m_temp_window = window;
-    m_temp_surface = surface;
-
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(instance->get_object(), &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(m_temp_instance->get_object(), &deviceCount, nullptr);
 
     if (deviceCount == 0) {
         throw std::runtime_error("failed to find GPUs with Vulkan support!");
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(instance->get_object(), &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(m_temp_instance->get_object(), &deviceCount, devices.data());
 
     for (const auto& device : devices) {
         if (this->isDeviceSuitable(device)) {

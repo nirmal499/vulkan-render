@@ -6,6 +6,7 @@
 #include <vulkan/surface/surface.hpp>
 #include <vulkan/device/device.hpp>
 #include <vulkan/swapchain/swapchain.hpp>
+#include <vulkan/renderpass/renderpass.hpp>
 #include <vulkan/graphicspipeline/graphicspipeline.hpp>
 
 class TriangleApplication
@@ -26,5 +27,6 @@ class TriangleApplication
         Surface* m_surface = nullptr;
         Device* m_device = nullptr;
         SwapChain* m_swapchain = nullptr;
+        RenderPass* m_renderpass = nullptr;
         GraphicsPipeline* m_graphicspipeline = nullptr;
 };

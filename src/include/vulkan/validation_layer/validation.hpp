@@ -1,13 +1,15 @@
 #pragma once
 
 #include <common/header.hpp>
-#include <vulkan/instance/instance.hpp>
+
+class Instance;
 
 class Validation
 {       
     public:
-        void create_debug_messenger(Instance* instance);
-        void destroy(Instance* instance);
+        void validation_initialization(Instance* instance);
+        void create_debug_messenger();
+        void destroy();
 
         const VkDebugUtilsMessengerEXT& get_object();
 
@@ -32,4 +34,7 @@ class Validation
 
     private:
         VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
+
+        /* helper objects */
+        Instance* m_temp_instance = nullptr;
 };

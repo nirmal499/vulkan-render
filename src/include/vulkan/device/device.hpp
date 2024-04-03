@@ -1,20 +1,22 @@
 #pragma once
 
 #include <common/header.hpp>
-#include <vulkan/instance/instance.hpp>
-#include <vulkan/surface/surface.hpp>
+
+class Instance;
+class Surface;
 
 class Device
 {   
     public:
-        void pick_physical_device(Instance* instance, Surface* surface, GLFWwindow* window);
+        void device_initialization(Instance* instance, Surface* surface, GLFWwindow* window);
+        void pick_physical_device();
 
         void create_logical_device();
 
         const VkDevice& get_logical_device();
         const VkPhysicalDevice& get_physical_device();
 
-        void destroy(){}
+        void destroy();
 
         COMMON::SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
         COMMON::QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
@@ -31,4 +33,5 @@ class Device
         /* helper objects */
         Surface* m_temp_surface = nullptr;
         GLFWwindow* m_temp_window = nullptr;
+        Instance* m_temp_instance = nullptr;
 };
