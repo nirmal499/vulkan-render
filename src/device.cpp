@@ -58,7 +58,7 @@ void Device::create_logical_device()
         throw std::runtime_error("Physical Device is NULL; Physical device was not selected");
     }
 
-    COMMON::QueueFamilyIndices indices = findQueueFamilies(m_physical_device);
+    COMMON::QueueFamilyIndices indices = this->findQueueFamilies(m_physical_device);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     

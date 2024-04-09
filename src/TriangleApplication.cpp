@@ -51,6 +51,13 @@ void TriangleApplication::initialize_vulkan()
     m_swapchain->create_image_views();
     (void)m_swapchain->get_object();
 
+    m_commandbuffer = new CommandBuffer();
+    m_commandbuffer->commandbuffer_initialization(m_device);
+    m_commandbuffer->create_command_pool();
+    m_commandbuffer->create_command_buffer();
+    (void)m_commandbuffer->get_command_pool();
+    (void)m_commandbuffer->get_command_buffer();
+
     m_renderpass = new RenderPass();
     m_renderpass->renderpass_initialization(m_device, m_swapchain);
     m_renderpass->create_render_pass();
@@ -63,13 +70,6 @@ void TriangleApplication::initialize_vulkan()
     (void)m_graphicspipeline->get_graphics_pipeline();
 
     m_swapchain->create_frame_buffers(m_renderpass);
-
-    m_commandbuffer = new CommandBuffer();
-    m_commandbuffer->commandbuffer_initialization(m_device, m_graphicspipeline, m_renderpass, m_swapchain);
-    m_commandbuffer->create_command_pool();
-    m_commandbuffer->create_command_buffer();
-    (void)m_commandbuffer->get_command_pool();
-    (void)m_commandbuffer->get_command_buffer();
 
     m_syncobject = new SyncObject();
     m_syncobject->syncobject_initialization(m_device);
@@ -99,7 +99,9 @@ void TriangleApplication::drawFrame()
     vkAcquireNextImageKHR(m_device->get_logical_device(), m_swapchain->get_object(), UINT64_MAX, m_syncobject->get_image_available_semaphore(), VK_NULL_HANDLE, &imageIndex);
 
     vkResetCommandBuffer(m_commandbuffer->get_command_buffer(), /*VkCommandBufferResetFlagBits*/ 0);
-    m_commandbuffer->record_command_buffer(imageIndex);
+    COMMON::record_command_buffer(
+        m_commandbuffer, m_graphicspipeline, m_renderpass, m_swapchain, imageIndex
+    );
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

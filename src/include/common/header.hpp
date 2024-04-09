@@ -16,6 +16,11 @@
 
 #define SHADERS_PATH "/home/nbaskey/Desktop/nirmal/projects/using-vulkan/shaders/SPIRV/"
 
+class CommandBuffer;
+class GraphicsPipeline;
+class RenderPass;
+class SwapChain;
+
 namespace COMMON
 {
     const uint32_t WIDTH = 800;
@@ -69,4 +74,7 @@ namespace COMMON
     bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
     std::vector<char> readFile(const std::string& filename);
+
+    void record_command_buffer(CommandBuffer* commandbuffer, GraphicsPipeline* graphicspipeline, RenderPass* renderpass, SwapChain* swapchain, uint32_t imageIndex);
+
 }

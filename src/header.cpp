@@ -1,4 +1,8 @@
 #include <common/header.hpp>
+#include <vulkan/swapchain/swapchain.hpp>
+#include <vulkan/renderpass/renderpass.hpp>
+#include <vulkan/graphicspipeline/graphicspipeline.hpp>
+#include <vulkan/commandbuffer/commandbuffer.hpp>
 
 namespace COMMON
 {
@@ -87,5 +91,60 @@ namespace COMMON
 
         return buffer;
     }
+
+
+    void record_command_buffer(CommandBuffer* commandbuffer, GraphicsPipeline* graphicspipeline, RenderPass* renderpass, SwapChain* swapchain, uint32_t imageIndex)
+    {
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if (vkBeginCommandBuffer(commandbuffer->get_command_buffer(), &beginInfo) != VK_SUCCESS) {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }else
+        {
+            std::cout << "Started recording command buffer\n";
+        }
+
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = renderpass->get_object();
+        renderPassInfo.framebuffer = swapchain->get_frame_buffer_using_index(imageIndex);
+        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.extent = swapchain->get_swap_chain_extent();
+
+        VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+        renderPassInfo.clearValueCount = 1;
+        renderPassInfo.pClearValues = &clearColor;
+
+        vkCmdBeginRenderPass(commandbuffer->get_command_buffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+            vkCmdBindPipeline(commandbuffer->get_command_buffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicspipeline->get_graphics_pipeline());
+
+            VkViewport viewport{};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = (float) swapchain->get_swap_chain_extent().width;
+            viewport.height = (float) swapchain->get_swap_chain_extent().height;
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            vkCmdSetViewport(commandbuffer->get_command_buffer(), 0, 1, &viewport);
+
+            VkRect2D scissor{};
+            scissor.offset = {0, 0};
+            scissor.extent = swapchain->get_swap_chain_extent();
+            vkCmdSetScissor(commandbuffer->get_command_buffer(), 0, 1, &scissor);            
+
+            vkCmdDraw(commandbuffer->get_command_buffer(), 3, 1, 0, 0);
+
+        vkCmdEndRenderPass(commandbuffer->get_command_buffer());
+
+        if (vkEndCommandBuffer(commandbuffer->get_command_buffer()) != VK_SUCCESS) {
+            throw std::runtime_error("failed to record command buffer!");
+        }
+        else{
+            std::cout << "Successfully Recorded Command Buffer\n";
+        }
+    }
+
     
 }
