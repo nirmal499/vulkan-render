@@ -3,6 +3,7 @@
 #include <vulkan/renderpass/renderpass.hpp>
 #include <vulkan/graphicspipeline/graphicspipeline.hpp>
 #include <vulkan/commandbuffer/commandbuffer.hpp>
+#include <vulkan/vertexbuffer/vertexbuffer.hpp>
 
 namespace COMMON
 {
@@ -93,7 +94,7 @@ namespace COMMON
     }
 
 
-    void record_command_buffer(const VkCommandBuffer& vulkan_command_buffer, GraphicsPipeline* graphicspipeline, RenderPass* renderpass, SwapChain* swapchain, uint32_t imageIndex)
+    void record_command_buffer(const VkCommandBuffer& vulkan_command_buffer, GraphicsPipeline* graphicspipeline, RenderPass* renderpass, SwapChain* swapchain, VertexBuffer* vertexbuffer, uint32_t imageIndex)
     {
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -132,9 +133,13 @@ namespace COMMON
             VkRect2D scissor{};
             scissor.offset = {0, 0};
             scissor.extent = swapchain->get_swap_chain_extent();
-            vkCmdSetScissor(vulkan_command_buffer, 0, 1, &scissor);            
+            vkCmdSetScissor(vulkan_command_buffer, 0, 1, &scissor);
 
-            vkCmdDraw(vulkan_command_buffer, 3, 1, 0, 0);
+            VkBuffer vertexBuffers[] = {vertexbuffer->get_vertex_buffer()};
+            VkDeviceSize offsets[] = {0};
+            vkCmdBindVertexBuffers(vulkan_command_buffer, 0, 1, vertexBuffers, offsets);         
+
+            vkCmdDraw(vulkan_command_buffer, static_cast<uint32_t>(COMMON::vertices.size()), 1, 0, 0);
 
         vkCmdEndRenderPass(vulkan_command_buffer);
 

@@ -10,6 +10,7 @@
 #include <vulkan/graphicspipeline/graphicspipeline.hpp>
 #include <vulkan/commandbuffer/commandbuffer.hpp>
 #include <vulkan/syncobject/syncobject.hpp>
+#include <vulkan/vertexbuffer/vertexbuffer.hpp>
 
 class TriangleApplication
 {
@@ -34,6 +35,7 @@ class TriangleApplication
         GraphicsPipeline* m_graphicspipeline = nullptr;
         CommandBuffer* m_commandbuffer = nullptr;
         SyncObject* m_syncobject = nullptr;
+        VertexBuffer* m_vertexbuffer = nullptr;
 
         uint32_t m_current_frame = 0;
 };

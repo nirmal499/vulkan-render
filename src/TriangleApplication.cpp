@@ -72,6 +72,10 @@ void TriangleApplication::initialize_vulkan()
 
     m_swapchain->create_frame_buffers(m_renderpass);
 
+    m_vertexbuffer = new VertexBuffer();
+    m_vertexbuffer->vertexbuffer_initialization(m_device);
+    m_vertexbuffer->create_vertex_buffer();
+
     m_syncobject = new SyncObject();
     m_syncobject->syncobject_initialization(m_device);
     m_syncobject->create_sync_objects();
@@ -98,7 +102,7 @@ void TriangleApplication::drawFrame()
 
     vkResetCommandBuffer(m_commandbuffer->get_command_buffer_from_vec(m_current_frame), /*VkCommandBufferResetFlagBits*/ 0);
     COMMON::record_command_buffer(
-        m_commandbuffer->get_command_buffer_from_vec(m_current_frame), m_graphicspipeline, m_renderpass, m_swapchain, imageIndex
+        m_commandbuffer->get_command_buffer_from_vec(m_current_frame), m_graphicspipeline, m_renderpass, m_swapchain, m_vertexbuffer, imageIndex
     );
 
     VkSubmitInfo submitInfo{};
@@ -142,6 +146,7 @@ void TriangleApplication::cleanup()
 {   
 
     m_syncobject->destroy(); /* Destroying SyncObjects(Semaphores) */
+    m_vertexbuffer->destroy(); /* Destroying Vertex Buffer and Allocate memory */
     m_commandbuffer->destroy(); /* Destroying CommandPool */
 
     /* We should delete the framebuffers before the image views and render pass that they are based on*/
@@ -156,6 +161,7 @@ void TriangleApplication::cleanup()
     m_instance->destroy(); /* Destroying vulkan Instance */
 
     delete m_syncobject;
+    delete m_vertexbuffer;
     delete m_commandbuffer;
     delete m_graphicspipeline;
     delete m_renderpass;

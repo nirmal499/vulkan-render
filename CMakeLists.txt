@@ -27,6 +27,7 @@ add_executable(${EXECUTABLE_NAME}
     src/graphicspipeline.cpp
     src/renderpass.cpp
     src/commandbuffer.cpp
+    src/vertexbuffer.cpp
     src/syncobject.cpp
     src/TriangleApplication.cpp
 )
