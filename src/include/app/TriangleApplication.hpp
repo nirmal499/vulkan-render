@@ -34,4 +34,6 @@ class TriangleApplication
         GraphicsPipeline* m_graphicspipeline = nullptr;
         CommandBuffer* m_commandbuffer = nullptr;
         SyncObject* m_syncobject = nullptr;
+
+        uint32_t m_current_frame = 0;
 };

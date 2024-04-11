@@ -26,6 +26,8 @@ namespace COMMON
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
 
+    const int MAX_FRAMES_IN_FLIGHT = 2;
+
     struct QueueFamilyIndices
     {
         std::optional<uint32_t> graphicsFamily;
@@ -75,6 +77,6 @@ namespace COMMON
 
     std::vector<char> readFile(const std::string& filename);
 
-    void record_command_buffer(CommandBuffer* commandbuffer, GraphicsPipeline* graphicspipeline, RenderPass* renderpass, SwapChain* swapchain, uint32_t imageIndex);
+    void record_command_buffer(const VkCommandBuffer& vulkan_command_buffer, GraphicsPipeline* graphicspipeline, RenderPass* renderpass, SwapChain* swapchain, uint32_t imageIndex);
 
 }

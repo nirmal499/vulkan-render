@@ -33,14 +33,9 @@ void CommandBuffer::create_command_pool()
     }
 }
 
-const VkCommandBuffer& CommandBuffer::get_command_buffer()
+const VkCommandBuffer& CommandBuffer::get_command_buffer_from_vec(size_t index)
 {
-    if(m_command_buffer == VK_NULL_HANDLE)
-    {
-        throw std::runtime_error("Command Buffer is NULL");
-    }
-
-    return m_command_buffer;
+    return m_command_buffers.at(index);
 }
 
 const VkCommandPool& CommandBuffer::get_command_pool()
@@ -53,15 +48,17 @@ const VkCommandPool& CommandBuffer::get_command_pool()
     return m_command_pool;
 }
 
-void CommandBuffer::create_command_buffer()
+void CommandBuffer::create_command_buffers()
 {
+    m_command_buffers.resize(COMMON::MAX_FRAMES_IN_FLIGHT);
+
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = m_command_pool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = 1;
+    allocInfo.commandBufferCount = static_cast<uint32_t>(m_command_buffers.size());
 
-    if (vkAllocateCommandBuffers(m_temp_device->get_logical_device(), &allocInfo, &m_command_buffer) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(m_temp_device->get_logical_device(), &allocInfo, m_command_buffers.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate command buffers!");
     }
     else
